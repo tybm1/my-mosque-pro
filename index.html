@@ -1367,7 +1367,13 @@ function sbApplyProfiles(list){
     if(p.facilities&&p.facilities.length){m.fac=p.facilities;m.facSrc=p.profile_src}
   });
 }
-function sbApply(rows,chg,prof){
+function sbHide(ids){
+  if(!ids||!ids.length)return;const h=new Set(ids.map(x=>x.id));
+  for(let i=MOSQUES.length-1;i>=0;i--)if(h.has(MOSQUES[i].id))MOSQUES.splice(i,1);   // closed or duplicate listings
+  const f=following.filter(id=>!h.has(id));if(f.length!==following.length){following=f;try{localStorage.setItem('mf_following',JSON.stringify(following))}catch(e){}}
+}
+function sbApply(rows,chg,prof,hid){
+  if(hid)sbHide(hid);
   if(prof)sbApplyProfiles(prof);
   SB.jam={};const hm=t=>t?t.slice(0,5):null;
   rows.forEach(r=>{(SB.jam[r.mosque_id]=SB.jam[r.mosque_id]||{})[r.day]={r:[hm(r.fajr),hm(r.dhuhr),hm(r.asr),hm(r.maghrib),hm(r.isha)],j:r.jumuah||null,src:sbHost(r.source_url)}});
@@ -1375,15 +1381,16 @@ function sbApply(rows,chg,prof){
 }
 async function sbLoad(force){
   const today=todayKey();
-  if(!force){try{const c=JSON.parse(localStorage.getItem('mmp_sb')||'null');if(c&&c.day===today){sbApply(c.rows,c.chg,c.prof);SB.day=today;jamChanged();if(Date.now()-c.at<3600e3)return}}catch(e){}}
+  if(!force){try{const c=JSON.parse(localStorage.getItem('mmp_sb')||'null');if(c&&c.day===today){sbApply(c.rows,c.chg,c.prof,c.hid);SB.day=today;jamChanged();if(Date.now()-c.at<3600e3)return}}catch(e){}}
   try{
     const end=jamAddDays(today,6);
-    const [rows,chg,prof]=await Promise.all([
+    const [rows,chg,prof,hid]=await Promise.all([
       sbGet(`jamaat_upcoming?select=mosque_id,day,fajr,dhuhr,asr,maghrib,isha,jumuah,source_url&day=gte.${today}&day=lte.${end}`),
       sbGet(`submissions?select=mosque_id,prayer,time,from_date&kind=eq.change&status=eq.approved&from_date=gte.${jamAddDays(today,-13)}`).catch(()=>[]),
-      sbGet('mosques?select=id,jumuah,sisters_web,sisters_web_note,facilities,profile_src&profile_at=not.is.null').catch(()=>[])]);
-    sbApply(rows,chg,prof);SB.day=today;jamChanged();
-    try{localStorage.setItem('mmp_sb',JSON.stringify({day:today,at:Date.now(),rows,chg,prof}))}catch(e){}
+      sbGet('mosques?select=id,jumuah,sisters_web,sisters_web_note,facilities,profile_src&profile_at=not.is.null').catch(()=>[]),
+      sbGet('mosques?select=id&active=is.false').catch(()=>[])]);
+    sbApply(rows,chg,prof,hid);SB.day=today;jamChanged();
+    try{localStorage.setItem('mmp_sb',JSON.stringify({day:today,at:Date.now(),rows,chg,prof,hid}))}catch(e){}
   }catch(e){}
 }
 setInterval(()=>{if(SB.day!==todayKey())sbLoad(true);else sbLoad(false)},15*60e3);
