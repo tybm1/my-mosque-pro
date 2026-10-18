@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MyMosqueProBot</title><link rel="icon" type="image/png" href="icon-192.png">
+<style>
+:root{--bg:#fafafa;--fg:#111;--fg2:#555;--accent:#1a8c4e;--gold:#F6EDD3;color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+main{max-width:680px;margin:0 auto;padding-block:40px 64px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+h1{font-size:28px;line-height:1.2;margin:0 0 6px;text-wrap:balance}h2{font-size:19px;margin:32px 0 6px}
+.k{color:var(--accent);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:12px}
+.note{background:var(--gold);border-radius:12px;padding:14px 16px;margin:20px 0}p,li{color:#222}small{color:var(--fg2)}
+a{color:var(--accent)}code{background:#eee;padding:1px 5px;border-radius:4px;font-size:14px}
+</style></head><body><main><div class="k">My Mosque Pro</div><h1>MyMosqueProBot</h1>
+<p>MyMosqueProBot reads the jamaat (congregation) times that UK mosques publish on their own websites, so worshippers can see accurate daily times in the <a href="./">My Mosque Pro</a> app. Every time shown in the app links back to the mosque's own website.</p>
+<h2>How it behaves</h2>
+<ul><li>It visits a mosque's prayer-times page about once a day, usually around 4am UK time.</li>
+<li>It makes at most one request every few seconds to any website, and doesn't download images, video or fonts.</li>
+<li>It obeys <code>robots.txt</code>. If a site disallows it, or refuses access, it stops visiting that site.</li>
+<li>It identifies itself as <code>MyMosqueProBot</code> with a link to this page.</li></ul>
+<h2>Stop or correct it</h2>
+<p>To stop the bot visiting your site, add this to your <code>robots.txt</code>:</p>
+<p><code>User-agent: MyMosqueProBot<br>Disallow: /</code></p>
+<p>If your mosque's times look wrong in the app, or you'd like us to stop listing them, email <a href="mailto:info@mymosquepro.com">info@mymosquepro.com</a> and we'll act on it promptly.</p>
+<p><small>Run by Soul Sync Solutions CIC.</small></p></main></body></html>
