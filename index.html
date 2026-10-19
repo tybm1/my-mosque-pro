@@ -599,12 +599,13 @@ body,.tab,#homeTab,#followTab,#charityTab,.detail-screen,.search-overlay{backgro
 .lg-btn{display:inline-block;margin-top:14px;background:var(--gold);color:#fff;border-radius:100px;padding:10px 20px;font-size:14px;font-weight:600}
 
 /* sisters badge */
-.sis-badge{display:inline-flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:12px;padding:6px 12px 6px 8px;border-radius:100px;font-size:13px;font-weight:600;text-align:left;max-width:100%}
+.sis-badge{display:inline-flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:12px;padding:8px;border-radius:100px;font-size:13px;font-weight:600;text-align:left;max-width:100%}
 .sis-badge svg{width:18px;height:18px;flex-shrink:0;fill:currentColor;stroke:none}
 .sis-badge.s-yes{background:var(--accent-dim);color:var(--accent)}
 .sis-badge.s-no{background:var(--bg2);color:var(--fg2)}
 .sis-badge.s-unk{background:var(--gold-dim);color:var(--gold)}
-.sis-pop{display:none;flex-basis:100%;font-style:normal;font-weight:400;font-size:13px;color:var(--fg2);padding:2px 2px 4px 25px;line-height:1.4}
+.sis-pop{display:none;flex-basis:100%;font-style:normal;font-weight:400;font-size:13px;color:var(--fg2);padding:2px 4px 4px;line-height:1.4}
+.sis-pop b{font-weight:600;color:var(--fg)}
 .sis-badge.show{border-radius:14px}
 .sis-badge.show .sis-pop{display:block}
 /* donate dropdown */
@@ -1886,7 +1887,7 @@ function openDetail(id){
       +`<div class="tl-cap">${J?`Jamaat times: ${esc(jamSrc(m))}. Sunrise is calculated.`:`Start times only — this mosque’s jamaat times aren’t available yet. Asr calculated by the ${asrHanafi(m)?'Hanafi':'Shafi’i'} method.`}</div>`;
   }
   // sisters
-  const sMap={yes:['Available','s-yes'],no:['Not available','s-no']};
+  const sMap={yes:['Available','s-yes'],no:['Not available','s-unk']};
   const [sTxt,sCls]=sMap[m.s]||['Not confirmed','s-unk'];
   const sNote=m.sn||'We could not confirm whether this mosque has space for sisters. Please check with the mosque before visiting.';
   // facts
@@ -1925,8 +1926,7 @@ function openDetail(id){
       </button>
       <button class="sis-badge ${sCls}" onclick="event.stopPropagation();this.classList.toggle('show')" aria-label="Sisters' space: ${sTxt}">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="6.5" r="3.5"/><path d="M12 10c-3 0-5 2.2-5.6 5.5L5 21h14l-1.4-5.5C17 12.2 15 10 12 10z"/></svg>
-        <span>${m.s==='yes'?"Sisters' space":m.s==='no'?"No sisters' space":"Sisters' space unconfirmed"}</span>
-        <em class="sis-pop">${sNote}</em>
+        <em class="sis-pop"><b>Sisters' space: ${sTxt.toLowerCase()}</b><br>${sNote}</em>
       </button>
       <div class="about-body"><div class="fx-list">${facts}</div></div>
     </div>
