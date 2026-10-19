@@ -568,6 +568,24 @@ body,.tab,#homeTab,#followTab,#charityTab,.detail-screen,.search-overlay{backgro
 .ds-x svg{width:15px;height:15px;stroke:var(--fg2);stroke-width:2.2;fill:none;stroke-linecap:round}
 .ds-l{font-size:13px;color:var(--fg2);margin:20px 0 8px}
 .seg{display:flex;background:var(--bg2);border-radius:12px;padding:3px}
+/* notifications */
+.nt-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 0 14px;width:100%;text-align:left}
+.nt-row>div{min-width:0}
+.nt-t{font-size:16px;font-weight:600;color:var(--fg);letter-spacing:-.01em}
+.nt-s{font-size:13px;color:var(--fg2);margin-top:3px;line-height:1.4}
+.nt-blk{border-bottom:1px solid var(--border);padding-bottom:16px}
+.nt-blk:last-of-type{border-bottom:0}
+.nt-blk .ds-l{margin-top:4px}
+.nt-blk .ds-l+.seg,.nt-blk .ds-l+.pchips{margin-bottom:14px}
+.sw{width:50px;height:30px;border-radius:15px;background:rgba(120,120,128,.32);position:relative;flex-shrink:0;transition:background .2s}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.sw.on{background:var(--accent)}
+.sw.on::after{transform:translateX(20px)}
+.pchips{display:flex;flex-wrap:wrap;gap:8px}
+.pchips button{padding:8px 14px;border-radius:100px;border:1.5px solid var(--border);font-size:14px;font-weight:500;color:var(--fg2)}
+.pchips button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.nt-note{font-size:13px;color:var(--fg);background:var(--gold-dim);border-radius:12px;padding:10px 12px;margin-top:12px;line-height:1.45}
+.nt-foot{font-size:12px;color:var(--fg2);margin-top:14px;line-height:1.45}
 .seg button{flex:1;padding:9px 0;border-radius:9px;font-size:14px;font-weight:500;color:var(--fg2)}
 .seg button.on{background:var(--card);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .amts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -1139,7 +1157,7 @@ svg.mq-logo{fill:#569E7E!important;stroke:none!important;width:20px!important;he
     <div class="follow-header fh-row">
       <div><div class="follow-title">My Mosques</div>
       <div class="follow-sub" id="followSub">Mosques you follow</div></div>
-      <div class="fh-btns"><span id="jamAdminBtn"></span><button class="h-help" onclick="openGuide()" aria-label="How to use the app"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg></button></div>
+      <div class="fh-btns"><span id="jamAdminBtn"></span><button class="h-help" onclick="openNotif()" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button><button class="h-help" onclick="openGuide()" aria-label="How to use the app"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg></button></div>
     </div>
     <div class="loc-slot"></div>
     <div id="followList"></div>
@@ -1208,6 +1226,7 @@ svg.mq-logo{fill:#569E7E!important;stroke:none!important;width:20px!important;he
 <div class="sk-toast" id="skToast" role="status" aria-live="polite"></div>
 
 <!-- ══ DONATE SHEET ══ -->
+<div class="dsheet" id="notifSheet"><div class="ds-scrim" onclick="closeNotif()"></div><div class="ds-panel" id="notifBody" role="dialog" aria-label="Notifications"></div></div>
 <div class="dsheet" id="donateSheet"><div class="ds-scrim" onclick="closeDonate()"></div><div class="ds-panel" id="donateBody" role="dialog" aria-label="Donate"></div></div>
 
 <!-- ══ DETAIL SCREEN ══ -->
@@ -1417,7 +1436,7 @@ function jamEffective(m,key=todayKey()){
 function jamFor(m){const e=jamEffective(m);return e?e.t:null}
 function jamSrc(m){const e=jamEffective(m);return e?e.src:''}
 function jamRefresh(){try{renderFollowing()}catch(e){}if(activeDetailId!=null){try{const sc=document.querySelector('#detailScreen .detail-body');const y=sc?sc.scrollTop:0;openDetail(activeDetailId);if(sc)sc.scrollTop=y}catch(e){}}if(document.getElementById('jamSheet').classList.contains('open')&&jamUI.mid!=null)jamRender();renderJamAdminBtn()}
-let jamT=null;function jamChanged(){clearTimeout(jamT);jamT=setTimeout(jamRefresh,150)}
+let jamT=null;function jamChanged(){clearTimeout(jamT);jamT=setTimeout(jamRefresh,150);ntQueue()}
 async function initJam(){
   try{
     if(!window.claude||!claude.use)return;
@@ -1961,6 +1980,7 @@ function toggleFollow(){
   if(following.includes(id)&&!defaultMosqueId)defaultMosqueId=id;
   if(!following.includes(id)&&defaultMosqueId===id)defaultMosqueId=following[0]||null;
   try{localStorage.setItem('mf_following',JSON.stringify(following));localStorage.setItem('mf_default',JSON.stringify(defaultMosqueId))}catch(e){}
+  ntQueue();
   const isFol=following.includes(id);
   document.getElementById('detailFollowBtn').classList.toggle('following',isFol);
   document.getElementById('followBtnText').textContent=isFol?'Following':'Follow';
@@ -2037,6 +2057,87 @@ const heartIco='<svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L
 function renderCharities(){
   document.getElementById('charityList').innerHTML=`<div class="give-list">${CHARITIES.map((c,i)=>giveRow('c',i,c.n,c.d,heartIco)).join('')}</div>`;
 }
+
+// ── NOTIFICATIONS ───────────────────────────────────────────────────────────
+// Scheduled on the phone (Capacitor LocalNotifications) from the times already downloaded: no server.
+var NT={jam:false,min:15,pr:{Fajr:1,Dhuhr:1,Asr:1,Maghrib:1,Isha:1},jum:false,jumAt:'10:00',chg:false},ntDenied=false,ntQ=null;
+try{Object.assign(NT,JSON.parse(localStorage.getItem('mmp_notif')||'{}'))}catch(e){}
+function ntLN(){try{const C=window.Capacitor;return C&&C.isNativePlatform&&C.isNativePlatform()&&C.Plugins&&C.Plugins.LocalNotifications||null}catch(e){return null}}
+function ntSave(){try{localStorage.setItem('mmp_notif',JSON.stringify(NT))}catch(e){}ntQueue();renderNotif()}
+async function ntToggle(k){
+  if(!NT[k]&&ntLN()){try{const p=await ntLN().requestPermissions();ntDenied=p.display!=='granted';if(ntDenied){renderNotif();return}}catch(e){}}
+  NT[k]=!NT[k];ntSave();
+}
+function ntMin(v){NT.min=v;ntSave()}
+function ntPr(p){NT.pr[p]=NT.pr[p]?0:1;ntSave()}
+function ntJumAt(v){NT.jumAt=v;ntSave()}
+function ntAt(key,t){const d=new Date(`${key}T${t.slice(0,5)}:00`);return isNaN(d)?null:d}
+function ntJumRows(m,day){if(!m.jm)return null;const bst=ukSummer(day);return m.jm.r.map(([l,s,w])=>[l,bst?s:(w===null?null:(w||s))])}
+function ntPlan(now=new Date()){
+  const out=[],mine=following.map(id=>MOSQUES.find(x=>x.id===id)).filter(Boolean);
+  for(let d=0;d<7;d++){
+    const day=new Date(now.getFullYear(),now.getMonth(),now.getDate()+d,12),key=todayKey(day),fri=day.getDay()===5;
+    mine.forEach(m=>{
+      const e=jamEffective(m,key);
+      if(NT.jam&&e)PR5.forEach(p=>{
+        if(!NT.pr[p]||!e.t[p]||(fri&&p==='Dhuhr'&&m.jm))return;
+        const at=ntAt(key,e.t[p]);if(!at)return;at.setMinutes(at.getMinutes()-NT.min);
+        if(at>now)out.push({at,title:`${p} jamaat in ${NT.min} min`,body:`${m.n} · ${fmt(e.t[p])}`});
+      });
+      if(NT.chg&&e&&d>0){
+        const pk=jamAddDays(key,-1),pe=jamEffective(m,pk);
+        const ch=pe?PR5.filter(p=>pe.t[p]&&e.t[p]&&pe.t[p].slice(0,5)!==e.t[p].slice(0,5)):[];
+        const at=ntAt(pk,'20:00');
+        if(ch.length&&at>now)out.push({at,title:`Jamaat time${ch.length>1?'s':''} change tomorrow`,
+          body:ch.map(p=>`${p} at ${m.n} moves to ${fmt(e.t[p])} (was ${fmt(pe.t[p])})`).join('. ')});
+      }
+      if(NT.jum&&fri){
+        const rows=ntJumRows(m,day),at=ntAt(key,NT.jumAt);
+        if(rows&&at>now)out.push({at,title:`Jumu’ah today at ${m.n}`,body:rows.map(([l,t])=>`${l} ${t?fmt(t):'– check with the mosque'}`).join(' · ')});
+      }
+    });
+  }
+  return out.sort((a,b)=>a.at-b.at).slice(0,60);   // iPhone keeps at most 64 waiting
+}
+function ntQueue(){clearTimeout(ntQ);ntQ=setTimeout(ntSchedule,1000)}
+async function ntSchedule(){
+  const ln=ntLN();if(!ln)return;
+  try{
+    const pend=await ln.getPending();
+    if(pend&&pend.notifications&&pend.notifications.length)await ln.cancel({notifications:pend.notifications.map(n=>({id:n.id}))});
+    const plan=ntPlan();
+    if(plan.length)await ln.schedule({notifications:plan.map((n,i)=>({id:i+1,title:n.title,body:n.body,schedule:{at:n.at,allowWhileIdle:true}}))});
+  }catch(e){}
+}
+function openNotif(){renderNotif();document.getElementById('notifSheet').classList.add('open')}
+function closeNotif(){document.getElementById('notifSheet').classList.remove('open')}
+function renderNotif(){
+  const el=document.getElementById('notifBody');if(!el)return;
+  const mine=following.map(id=>MOSQUES.find(x=>x.id===id)).filter(Boolean);
+  const withJam=mine.filter(m=>jamEffective(m)).length,withJum=mine.filter(m=>m.jm).length;
+  const sw=(k,t,sub)=>`<button class="nt-row" role="switch" aria-checked="${!!NT[k]}" onclick="ntToggle('${k}')"><div><div class="nt-t">${t}</div><div class="nt-s">${sub}</div></div><span class="sw${NT[k]?' on':''}"></span></button>`;
+  const notes=[];
+  if(!ntLN())notes.push('Notifications work in the My Mosque Pro app for iPhone and Android. They aren’t sent from the web version.');
+  if(ntDenied)notes.push('Notifications are turned off for My Mosque Pro in your phone’s Settings. Turn them on there to get reminders.');
+  if(!mine.length)notes.push('Follow a mosque to get reminders for it.');
+  el.innerHTML=`<div class="ds-grab"></div>
+    <div class="ds-head"><div><div class="ds-k">Notifications</div><div class="ds-name">Reminders for your mosques</div></div>
+      <button class="ds-x" onclick="closeNotif()" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    ${notes.map(n=>`<div class="nt-note">${n}</div>`).join('')}
+    <div class="nt-blk">${sw('jam','Jamaat reminders','Before each jamaat at the mosques you follow')}
+      ${NT.jam?`<div class="ds-l">How long before</div>
+      <div class="seg">${[5,10,15,20,30].map(v=>`<button class="${NT.min===v?'on':''}" onclick="ntMin(${v})">${v} min</button>`).join('')}</div>
+      <div class="ds-l">Prayers</div>
+      <div class="pchips">${PR5.map(p=>`<button class="${NT.pr[p]?'on':''}" aria-pressed="${!!NT.pr[p]}" onclick="ntPr('${p}')">${p}</button>`).join('')}</div>
+      ${mine.length&&withJam<mine.length?`<div class="nt-s">${withJam} of ${mine.length} followed mosques ${withJam===1?'has':'have'} jamaat times. The others don’t get reminders yet.</div>`:''}`:''}</div>
+    <div class="nt-blk">${sw('jum','Jumu’ah reminder','Friday morning, with khutbah and jamaat times')}
+      ${NT.jum?`<div class="ds-l">Remind me at</div>
+      <div class="seg">${['08:00','09:00','10:00','11:00','12:00'].map(v=>`<button class="${NT.jumAt===v?'on':''}" onclick="ntJumAt('${v}')">${fmt(v).replace(':00','').replace(' ','').toLowerCase()}</button>`).join('')}</div>
+      ${mine.length&&withJum<mine.length?`<div class="nt-s">${withJum} of ${mine.length} followed mosques ${withJum===1?'has':'have'} Jumu’ah times.</div>`:''}`:''}</div>
+    <div class="nt-blk">${sw('chg','Time change alerts','At 8pm the evening before a jamaat time at your mosque changes')}</div>
+    <div class="nt-foot">Reminders use the times in the app, so they’re only as accurate as the mosque’s published timetable.</div>`;
+}
+ntQueue();
 
 // ── DONATE SHEET ─────────────────────────────────────────────────────────────
 let dz={amt:10,fund:'Sadaqah',target:null};
