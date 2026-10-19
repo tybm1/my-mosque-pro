@@ -1906,7 +1906,6 @@ function openDetail(id){
     m.park&&row('park','Parking',m.park),
     m.wc&&row('wc','Accessibility',m.wc),
     m.fac&&m.fac.length&&row('info','Facilities',esc(m.fac.join(' · '))+(m.facSrc?`<span class="fx-sub">From ${esc(m.facSrc)}</span>`:'')),
-    m.t==='c'&&row('info','Community listed',m.y===2018?(m.y26?'Listed in the MuslimsInBritain.org mosque directory (2018) and still listed in current (2026) directories. Prayer times are calculated for this location.':'Listed in the MuslimsInBritain.org mosque directory (2018). Details may have changed since then — please check with the mosque. Prayer times are calculated for this location.'):'Address from public mosque directories. Prayer times are calculated for this location. Jumu’ah, facilities and donation details haven’t been confirmed by the mosque yet.'),
     m.th&&row('info','Tradition',m.th),
     m.jo&&row('jum','Jumu’ah only','Used for Friday prayers; may not be open for daily prayers.'),
     ...(m.extra||[]).map(x=>row('info','Good to know',x)),
