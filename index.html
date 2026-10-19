@@ -1805,7 +1805,7 @@ function renderHomeCards(){
   const el=document.getElementById('homeCards');
   el.innerHTML=list.map(m=>{
     const t=cache[m.id];const open=isOpen(t);
-    const badge=t===undefined?`<div class="badge b-sk sk"></div>`:(open?`<div class="badge b-open">Open</div>`:'');
+    const badge='';
     const dist=m.dist!=null?`<div class="dist">${distStr(m.dist)}</div>`:'';
     const[bg]=mColor(m.id);
     return`<div class="mcard" onclick="openDetail(${m.id})"><div class="mc-inner"><div class="mc-ico" style="background:${bg}">${mosqueIconFor(m.id)}</div><div class="mc-body"><div class="mc-name">${m.n}</div><div class="mc-meta">${m.c} · ${m.pc}</div></div><div class="mc-right">${badge}${dist}</div></div></div>`;
@@ -1845,7 +1845,7 @@ function renderMosqueList(){
     <div class="city-lbl">${city}</div>
     ${ms.map(m=>{
       const t=cache[m.id];const open=isOpen(t);
-      const badge=t===undefined?`<div class="badge b-sk sk"></div>`:(open?`<div class="badge b-open">Open</div>`:'');
+      const badge='';
       const dist=m.dist!=null?`<div class="dist">${distStr(m.dist)}</div>`:'';
       const[bg]=mColor(m.id);
       return`<div class="mrow" onclick="openDetail(${m.id})"><div class="mr-ico" style="background:${bg}">${mosqueIconFor(m.id)}</div><div class="mr-body"><div class="mr-name">${m.n}</div><div class="mr-meta">${m.ar?m.ar+' · ':''}${m.pc}</div></div><div class="mr-right">${badge}${dist}</div></div>`;
@@ -2018,7 +2018,7 @@ function renderFollowing(){
           <div class="mr-name">${m.n}</div>
           <div class="mr-meta">${isDef?'<span class="fc-def">Default</span> · ':''}${m.c} · ${m.pc}</div>
         </div>
-        ${open?'<div class="badge b-open">Open</div>':''}
+        
         <svg class="fc-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
       <div class="fc-times">${times}</div>
