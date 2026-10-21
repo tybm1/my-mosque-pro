@@ -435,6 +435,10 @@ body,.tab,#homeTab,#followTab,#charityTab,.detail-screen,.search-overlay{backgro
 .ps.cur .ps-n,.ps.cur .ps-t{color:var(--gold)}
 /* iPhone zooms the whole app when a text box has text under 16px: keep every box at 16px */
 input,select,textarea{font-size:16px!important}
+/* everything stays fixed to the screen: panels scroll up and down only, never sideways */
+.tab,.detail-body,.search-results,.ds-panel,.detail-screen,.search-overlay,.app{overflow-x:hidden!important;overscroll-behavior-x:none;touch-action:pan-y}
+.detail-body *,.search-results *{max-width:100%}
+.detail-body a,.fx-list a{overflow-wrap:anywhere;word-break:break-word}
 /* small phones: keep all six prayer times on one row */
 @media (max-width:360px){.ps{padding:14px 0}.ps-t,.ps.cur .ps-t{font-size:10.5px;letter-spacing:-.03em}.ps-n{font-size:10px}}
 /* tablets: use more of the screen */
