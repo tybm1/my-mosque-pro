@@ -2,7 +2,7 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="description" content="Find Sunni mosques across the UK with daily jamaat times, Jumu'ah times, prayer times and Qibla.">
 <meta name="theme-color" content="#1a8c4e">
 <link rel="manifest" href="manifest.json">
@@ -433,6 +433,8 @@ body,.tab,#homeTab,#followTab,#charityTab,.detail-screen,.search-overlay{backgro
 .sec-a,.dist,.ch-raised{color:var(--gold)}
 .pr-strip{border-top-color:#e9dcb8;border-bottom-color:#e9dcb8}
 .ps.cur .ps-n,.ps.cur .ps-t{color:var(--gold)}
+/* iPhone zooms the whole app when a text box has text under 16px: keep every box at 16px */
+input,select,textarea{font-size:16px!important}
 /* small phones: keep all six prayer times on one row */
 @media (max-width:360px){.ps{padding:14px 0}.ps-t,.ps.cur .ps-t{font-size:10.5px;letter-spacing:-.03em}.ps-n{font-size:10px}}
 /* tablets: use more of the screen */
