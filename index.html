@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <style>
-:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{color-scheme:light}
 body{margin:0;font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 img{max-width:100%}[hidden]{display:none!important}
 </style>
@@ -47,7 +47,6 @@ body{
   font-family:'Inter',-apple-system,sans-serif;
   -webkit-font-smoothing:antialiased;
   background:var(--bg);color:var(--fg);
-  padding-top:env(safe-area-inset-top,0px);
   padding-left:max(0px,env(safe-area-inset-left,0px));
   padding-right:max(0px,env(safe-area-inset-right,0px));
 }
@@ -55,7 +54,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;-webkit-ta
 a{color:inherit;text-decoration:none}
 
 /* ── LAYOUT ── */
-.app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:430px;margin:0 auto;position:relative;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:430px;margin:0 auto;position:relative;overflow:hidden;padding-top:env(safe-area-inset-top,0px)}
 
 /* ── TABS ── */
 .tab{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;position:relative;z-index:1;background:var(--bg)}
@@ -196,7 +195,7 @@ a{color:inherit;text-decoration:none}
 .dc-p.cur{color:var(--accent);font-weight:700}
 
 /* Search overlay */
-.search-overlay{position:absolute;inset:0;z-index:70;background:var(--bg);transform:translateY(-100%);transition:transform .28s cubic-bezier(.25,.72,0,1);display:flex;flex-direction:column;padding-bottom:88px}
+.search-overlay{position:absolute;inset:0;z-index:70;background:var(--bg);transform:translateY(-100%);transition:transform .28s cubic-bezier(.25,.72,0,1);display:flex;flex-direction:column;padding-bottom:88px;padding-top:env(safe-area-inset-top,0px)}
 .search-overlay.open{transform:translateY(0)}
 .search-header{
   display:flex;align-items:center;gap:10px;
@@ -277,7 +276,7 @@ a{color:inherit;text-decoration:none}
 /* ═══════════════════ DETAIL SCREEN ═══════════════════ */
 .detail-screen{
   position:absolute;inset:0;z-index:80;max-width:430px;margin:0 auto;
-  background:var(--bg);
+  background:var(--bg);padding-top:env(safe-area-inset-top,0px);
   transform:translateX(100%);transition:transform .3s cubic-bezier(.25,.72,0,1);
   display:flex;flex-direction:column;overflow:hidden;
 }
