@@ -2062,7 +2062,7 @@ function renderCharities(){
 // Scheduled on the phone (Capacitor LocalNotifications) from the times already downloaded: no server.
 var NT={jam:false,min:15,pr:{Fajr:1,Dhuhr:1,Asr:1,Maghrib:1,Isha:1},jum:false,jumAt:'10:00',chg:false},ntDenied=false,ntQ=null;
 try{Object.assign(NT,JSON.parse(localStorage.getItem('mmp_notif')||'{}'))}catch(e){}
-function ntLN(){try{const C=window.Capacitor;return C&&C.isNativePlatform&&C.isNativePlatform()&&C.Plugins&&C.Plugins.LocalNotifications||null}catch(e){return null}}
+var ntPlug=null;function ntLN(){try{const C=window.Capacitor;if(!(C&&C.isNativePlatform&&C.isNativePlatform()))return null;if(!ntPlug)ntPlug=(C.Plugins&&C.Plugins.LocalNotifications)||(C.registerPlugin&&C.registerPlugin('LocalNotifications'))||null;return ntPlug}catch(e){return null}}
 function ntSave(){try{localStorage.setItem('mmp_notif',JSON.stringify(NT))}catch(e){}ntQueue();renderNotif()}
 async function ntToggle(k){
   if(!NT[k]&&ntLN()){try{const p=await ntLN().requestPermissions();ntDenied=p.display!=='granted';if(ntDenied){renderNotif();return}}catch(e){}}
