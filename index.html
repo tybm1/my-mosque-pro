@@ -1368,7 +1368,7 @@ function jamAddDays(key,n){const d=new Date(key+'T12:00:00');d.setDate(d.getDate
 const SB_URL='https://zmwpynuvjwcjbnpknnjx.supabase.co',SB_KEY='sb_publishable_RunPVqIJw09U5ltf6bri4w_Hpj5YGQL';
 const SB={jam:{},chg:[],ok:false,day:null};
 const HOSTED=!(window.claude&&window.claude.use);   // true outside Claude (website, App Store / Play Store apps)
-function sbHost(u){try{return new URL(u).hostname.replace(/^www\./,'')}catch(e){return 'the mosque’s website'}}
+function sbHost(u){try{return new URL(u).hostname.replace(/^www\./,'')}catch(e){return u?String(u).replace(/\s*\(entered by hand\)/,''):'the mosque’s website'}}
 async function sbGet(path){
   const out=[];for(let start=0;start<20000;start+=1000){
     const r=await fetch(SB_URL+'/rest/v1/'+path,{headers:{apikey:SB_KEY,Range:`${start}-${start+999}`,'Range-Unit':'items'}});
@@ -1400,7 +1400,7 @@ function sbApply(rows,chg,prof,hid){
 }
 async function sbLoad(force){
   const today=todayKey();
-  if(!force){try{const c=JSON.parse(localStorage.getItem('mmp_sb')||'null');if(c&&c.day===today){sbApply(c.rows,c.chg,c.prof,c.hid);SB.day=today;jamChanged();if(Date.now()-c.at<3600e3)return}}catch(e){}}
+  if(!force){try{const c=JSON.parse(localStorage.getItem('mmp_sb')||'null');if(c&&c.day===today){sbApply(c.rows,c.chg,c.prof,c.hid);SB.day=today;jamChanged();if(Date.now()-c.at<120e3)return}}catch(e){}}
   try{
     const end=jamAddDays(today,6);
     const [rows,chg,prof,hid]=await Promise.all([
