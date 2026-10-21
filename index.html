@@ -1915,6 +1915,9 @@ function jumCard(m){
     ${other?`<div class="jm-note">${bst?'Winter':'Summer'}: ${other}</div>`:''}${m.jm.n?`<div class="jm-note">${m.jm.n}</div>`:''}
 </div></div>`;
 }
+// Only a mosque's own website is shown — never a directory or listing site.
+const NOT_OWN_SITE=/(^|\.)(mosquefinder\.co\.uk|towerhamletsmosques\.co\.uk|prayersconnect\.com|mawaqit\.net|mosquedirectory\.co\.uk|muslimsinbritain\.org|mcb\.org\.uk|muslimcouncil\.org\.uk|emasjidlive\.co\.uk|newhammosques\.com|nearestmosque\.com|zabihah\.com|praysalat\.com|salahtimes\.co\.uk|prayer-times\.co\.uk|my-masjid\.com|masjidbox\.com|google\.[a-z.]+|wikipedia\.org|facebook\.com|instagram\.com|linktr\.ee|dawateislami\.net|dawateislami\.co\.uk|dawateislamimidlands\.net|dawateislamiyorkshire\.co\.uk|minhaj\.org)$/i;
+function ownSite(u){if(!u)return false;try{return !NOT_OWN_SITE.test(new URL(u).hostname.replace(/^www\./,''))}catch(e){return false}}
 function openDetail(id){
   activeDetailId=id;
   const m=MOSQUES.find(x=>x.id===id);if(!m)return;
@@ -1963,7 +1966,7 @@ function openDetail(id){
     ...(m.extra||[]).map(x=>row('info','Good to know',x)),
     row('pin','Address',`${m.a?m.a+', ':''}${m.c} ${m.pc}${m.dist!=null?`<span class="fx-sub">${distStr(m.dist)} from you</span>`:''}`),
     m.tel&&row('tel','Phone',`<span class="sel">${m.tel}</span>`),
-    m.w&&row('web','Website',`<a href="${m.w}" target="_blank" rel="noopener">${m.w.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,'')}</a>`),
+    ownSite(m.w)&&row('web','Website',`<a href="${m.w}" target="_blank" rel="noopener">${m.w.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,'')}</a>`),
     m.fb&&row('web','Facebook',`<a href="${m.fb}" target="_blank" rel="noopener">${m.fb.replace(/^https?:\/\/(www\.|m\.)?/,'')}</a>`)
   ].filter(Boolean).join('');
   // donation
