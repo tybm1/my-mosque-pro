@@ -1487,7 +1487,7 @@ async function jamVote(sid){
 const jamUI={mid:null,tab:'change',rows:null,busy:false,msg:'',err:''};
 function openJam(mid,tab){jamUI.mid=mid;jamUI.tab=tab||'change';jamUI.rows=null;jamUI.msg='';jamUI.err='';jamRender();document.getElementById('jamSheet').classList.add('open')}
 function closeJam(){document.getElementById('jamSheet').classList.remove('open')}
-function jamTabs(){return [['change','Report a change'],...(HOSTED?[]:[['timetable','Upload timetable']]),['claim','I run this mosque']].map(([k,l])=>`<button class="jm-tab${jamUI.tab===k?' on':''}" onclick="jamUI.tab='${k}';jamUI.msg='';jamUI.err='';jamRender()">${l}</button>`).join('')}
+function jamTabs(){return [['change','Report a change'],...(HOSTED?[]:[['timetable','Upload timetable']]),...(HOSTED?[]:[['claim','I run this mosque']])].map(([k,l])=>`<button class="jm-tab${jamUI.tab===k?' on':''}" onclick="jamUI.tab='${k}';jamUI.msg='';jamUI.err='';jamRender()">${l}</button>`).join('')}
 function jamRender(){
   const m=MOSQUES.find(x=>x.id===jamUI.mid);if(!m)return;const el=document.getElementById('jamBody');
   const can=HOSTED||!!(JS.db&&JS.uid);const isCom=!HOSTED&&jamIsCommittee(m.id,JS.uid);
@@ -2599,9 +2599,9 @@ function renderSupport(){
 function renderSupportBody(el){
   if(sup.step==='done'){
     el.innerHTML=`<div class="sup-t">JazakAllahu khayran${sup.lastName?`, ${esc(sup.lastName)}`:''}</div>
-      <div class="sup-d">${stripeLink(sup.freq,'')?`Your details are saved. Finish your ${sup.freq==='monthly'?'monthly ':''}£${fmtGBP(sup.amt)} gift securely with Stripe${sup.freq==='once'?`, entering £${fmtGBP(sup.amt)} as the amount`:Math.round(sup.amt/MONTHLY_UNIT)>1?`. On the next page set the quantity to <b>${Math.round(sup.amt/MONTHLY_UNIT)}</b> (${Math.round(sup.amt/MONTHLY_UNIT)} × £3.50)`:''}.`:'Your details are saved. Online payment is being set up, so we’ll be in touch soon if you left your email.'}</div>
-      ${stripeLink(sup.freq,'')?`<a class="ds-go" href="${stripeLink(sup.freq,sup.mine&&sup.mine.email)}" target="_blank" rel="noopener">Pay securely with Stripe</a>`:''}
-      <button class="sup-again" onclick="supSet('step','form')">Edit my details</button>`;
+      <div class="sup-d">${stripeLink(sup.freq,'')?`Finish your ${sup.freq==='monthly'?'monthly ':''}£${fmtGBP(sup.amt)} gift securely with Stripe${sup.freq==='once'?`, entering £${fmtGBP(sup.amt)} as the amount`:Math.round(sup.amt/MONTHLY_UNIT)>1?`. On the next page set the quantity to <b>${Math.round(sup.amt/MONTHLY_UNIT)}</b> (${Math.round(sup.amt/MONTHLY_UNIT)} × £3.50)`:''}.`:'Online payment is being set up.'}</div>
+      ${stripeLink(sup.freq,'')?`<a class="ds-go" href="${stripeLink(sup.freq,'')}" target="_blank" rel="noopener">Pay securely with Stripe</a>`:''}
+      <button class="sup-again" onclick="supSet('step','form')">Change amount</button>`;
     return;
   }
   const m=sup.mine||{};
@@ -2611,12 +2611,8 @@ function renderSupportBody(el){
     :`<div class="amts">${[3,5,10,20,50].map(a=>`<button class="${sup.amt===a?'on':''}" onclick="supSet('amt',${a})">£${a}</button>`).join('')}
       <label class="amt-other${[3,5,10,20,50].includes(sup.amt)?'':' on'}"><span>£</span><input type="number" inputmode="decimal" min="1" placeholder="Other" value="${[3,5,10,20,50].includes(sup.amt)?'':sup.amt||''}" oninput="sup.amt=parseFloat(this.value)||0" onfocus="this.parentNode.classList.add('on');document.querySelectorAll('#supCard .amts>button').forEach(b=>b.classList.remove('on'))"></label></div>`}
     <form class="sup-form" onsubmit="supSubmit(event)">
-      <label>Your name <span>optional</span><input name="name" autocomplete="name" maxlength="80" value="${esc(m.name||'')}"></label>
-      <label>Email <span>optional, so we can say thanks</span><input name="email" type="email" autocomplete="email" maxlength="120" value="${esc(m.email||'')}"></label>
-      <label>Message <span>optional</span><textarea name="msg" rows="2" maxlength="400">${esc(m.msg||'')}</textarea></label>
-      <label class="sup-chk"><input type="checkbox" name="anon" ${m.anon?'checked':''}> Keep my gift anonymous</label>
       <button class="ds-go sup-go" type="submit">${stripeLink(sup.freq,'')?`Continue with £${sup.amt?fmtGBP(sup.amt):'—'}${sup.freq==='monthly'?' a month':''}`:'Save my support'}</button>
-      <div class="ds-note" id="supNote">${sup.db&&sup.uid?'Your details are private to the My Mosque Pro team.':'Sign in to Claude to save your details. Otherwise they stay on this device.'} Card details are only entered on Stripe's secure checkout.</div>
+      <div class="ds-note" id="supNote">Card details are only entered on Stripe's secure checkout. My Mosque Pro doesn't collect your name or email.</div>
     </form>`;
 }
 function esc(t){return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -2624,7 +2620,7 @@ async function supSubmit(e){
   e.preventDefault();
   const f=e.target,amt=sup.amt||0;
   if(!amt||amt<1){document.getElementById('supNote').textContent='Please choose an amount of £1 or more.';return}
-  const rec={name:f.name.value.trim(),email:f.email.value.trim(),msg:f.msg.value.trim(),anon:f.anon.checked,amt,freq:sup.freq,at:new Date().toISOString()};
+  const rec={name:'',email:'',msg:'',anon:true,amt,freq:sup.freq,at:new Date().toISOString()};
   const btn=f.querySelector('.sup-go');btn.disabled=true;btn.textContent='Saving…';
   let ok=false;
   if(sup.db&&sup.uid){try{await sup.db.doc('supporters/'+sup.uid).set(rec);ok=true}catch(err){}}
