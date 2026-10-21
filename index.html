@@ -1874,7 +1874,7 @@ function renderMosqueList(){
 // ── DETAIL ────────────────────────────────────────────────────────────────────
 function jumCard(m){
   const fri=isFriday(),bst=ukSummer();
-  if(!m.jm)return`<div class="sect"><div class="jm-card none"><div class="jm-h"><span class="jm-ic"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V10l7-6 7 6v11"/><path d="M10 21v-5h4v5"/></svg></span><div><div class="jm-k">Jumu’ah${fri?' · today':''}</div><div class="jm-t">Times not confirmed yet</div></div></div><div class="jm-note">Jumu’ah is held after Dhuhr. ${m.tel?`Call <b>${m.tel}</b> to check the khutbah time.`:m.w?'Check the mosque’s website for the khutbah time.':'Check with the mosque for the khutbah time.'}</div></div></div>`;
+  if(!jumMain(m))return'';   // no Jumu'ah times: leave the section out
   const rows=jumRows(m);const anySeason=m.jm.r.some(r=>r[1]!==r[2]&&r[2]!==undefined);
   const other=m.jm.r.filter(r=>r[2]&&r[1]!==r[2]).map(r=>`${r[0]} ${fmt(bst?r[2]:r[1])}`).join(' · ');
   return`<div class="sect"><div class="jm-card${fri?' fri':''}"><div class="jm-h"><span class="jm-ic"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V10l7-6 7 6v11"/><path d="M10 21v-5h4v5"/></svg></span><div><div class="jm-k">Jumu’ah${fri?' · today':' · Fridays'}</div><div class="jm-t">${fmt(jumMain(m))||'See below'}</div></div>${anySeason?`<span class="jm-season">${bst?'Summer':'Winter'} time</span>`:''}</div>
@@ -2042,7 +2042,7 @@ function renderFollowing(){
         <svg class="fc-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
       <div class="fc-times">${times}</div>
-      <div class="fc-jm${isFriday()?' fri':''}"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V10l7-6 7 6v11"/><path d="M10 21v-5h4v5"/></svg><span>Jumu’ah${isFriday()?' today':''}</span><b>${jumMain(m)?fmt(jumMain(m)):'Not confirmed'}</b>${m.jm&&m.jm.r.length>1?`<em>+${m.jm.r.length-1} more</em>`:''}</div>
+      ${jumMain(m)?`<div class="fc-jm${isFriday()?' fri':''}"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V10l7-6 7 6v11"/><path d="M10 21v-5h4v5"/></svg><span>Jumu’ah${isFriday()?' today':''}</span><b>${fmt(jumMain(m))}</b>${m.jm.r.length>1?`<em>+${m.jm.r.length-1} more</em>`:''}</div>`:''}
     </div>`;
   }).join('')+`</div><div class="fe-add-wrap"><button class="fe-add" onclick="openSearch()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a mosque</button></div>`;
   list.forEach(m=>{if(cache[m.id]===undefined)getTimes(m).then(()=>renderFollowing())});
