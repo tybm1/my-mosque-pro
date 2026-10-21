@@ -54,7 +54,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;-webkit-ta
 a{color:inherit;text-decoration:none}
 
 /* ── LAYOUT ── */
-.app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:430px;margin:0 auto;position:relative;overflow:hidden;padding-top:env(safe-area-inset-top,0px)}
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:var(--appw,430px);margin:0 auto;position:relative;overflow:hidden;padding-top:env(safe-area-inset-top,0px)}
 
 /* ── TABS ── */
 .tab{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;position:relative;z-index:1;background:var(--bg)}
@@ -275,12 +275,13 @@ a{color:inherit;text-decoration:none}
 
 /* ═══════════════════ DETAIL SCREEN ═══════════════════ */
 .detail-screen{
-  position:absolute;inset:0;z-index:80;max-width:430px;margin:0 auto;
+  position:absolute;inset:0;z-index:80;max-width:var(--appw,430px);margin:0 auto;
   background:var(--bg);padding-top:env(safe-area-inset-top,0px);
   transform:translateX(100%);transition:transform .3s cubic-bezier(.25,.72,0,1);
   display:flex;flex-direction:column;overflow:hidden;
 }
-.detail-screen.open{transform:translateX(0)}
+.detail-screen:not(.open){visibility:hidden;transition:transform .3s cubic-bezier(.25,.72,0,1),visibility 0s .3s}
+.detail-screen.open{transform:translateX(0);visibility:visible}
 .detail-nav{
   display:flex;align-items:center;justify-content:space-between;
   padding:14px max(20px,env(safe-area-inset-left,0px)) 10px;
@@ -431,6 +432,10 @@ body,.tab,#homeTab,#followTab,#charityTab,.detail-screen,.search-overlay{backgro
 .sec-a,.dist,.ch-raised{color:var(--gold)}
 .pr-strip{border-top-color:#e9dcb8;border-bottom-color:#e9dcb8}
 .ps.cur .ps-n,.ps.cur .ps-t{color:var(--gold)}
+/* small phones: keep all six prayer times on one row */
+@media (max-width:360px){.ps{padding:14px 0}.ps-t,.ps.cur .ps-t{font-size:10.5px;letter-spacing:-.03em}.ps-n{font-size:10px}}
+/* tablets: use more of the screen */
+@media (min-width:700px){:root{--appw:640px}}
 .ps.cur::after{background:var(--accent)}
 .dc-p.cur{color:var(--gold)}
 .default-card{box-shadow:inset 3px 0 0 var(--gold)}
@@ -557,7 +562,7 @@ body,.tab,#homeTab,#followTab,#charityTab,.detail-screen,.search-overlay{backgro
 .dsheet.open{pointer-events:auto}
 .ds-scrim{position:absolute;inset:0;background:rgba(17,17,17,.35);opacity:0;transition:opacity .25s}
 .dsheet.open .ds-scrim{opacity:1}
-.ds-panel{position:absolute;left:0;right:0;bottom:0;max-width:430px;margin:0 auto;background:var(--bg);border-radius:22px 22px 0 0;padding:8px max(20px,env(safe-area-inset-left,0px)) max(24px,env(safe-area-inset-bottom,0px));padding-right:max(20px,env(safe-area-inset-right,0px));transform:translateY(105%);transition:transform .32s cubic-bezier(.25,.72,0,1);max-height:92%;overflow-y:auto}
+.ds-panel{position:absolute;left:0;right:0;bottom:0;max-width:var(--appw,430px);margin:0 auto;background:var(--bg);border-radius:22px 22px 0 0;padding:8px max(20px,env(safe-area-inset-left,0px)) max(24px,env(safe-area-inset-bottom,0px));padding-right:max(20px,env(safe-area-inset-right,0px));transform:translateY(105%);transition:transform .32s cubic-bezier(.25,.72,0,1);max-height:92%;overflow-y:auto}
 .dsheet.open .ds-panel{transform:none}
 .ds-grab{width:38px;height:5px;border-radius:3px;background:var(--border);margin:4px auto 14px}
 .ds-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
@@ -1204,7 +1209,6 @@ svg.mq-logo{fill:#569E7E!important;stroke:none!important;width:20px!important;he
   </div>
   <div class="search-chips">
     <button class="chip on" data-f="all">All</button>
-    <button class="chip" data-f="open">Open now</button>
     <button class="chip" data-f="sisters">Sisters' space</button>
     <button class="chip" data-f="donate">Online donation</button>
   </div>
@@ -1582,7 +1586,7 @@ function initGeo(fromUser){
   navigator.geolocation.getCurrentPosition(pos=>{
     geoState='granted';
     try{localStorage.setItem('mf_geo_asked','1')}catch(e){}
-    userLat=pos.coords.latitude;userLng=pos.coords.longitude;
+    userLat=pos.coords.latitude;userLng=pos.coords.longitude;geoWatch();
     document.getElementById('locLabel').textContent='Near You';
     const nearest=sortedMosques()[0];
     if(nearest)getTimes(nearest).then(t=>{if(t){updateHero(t)}});
@@ -1592,6 +1596,29 @@ function initGeo(fromUser){
     geoState=(err&&err.code===1)?'denied':'error';renderLocBanner();
   },{enableHighAccuracy:false,timeout:10000,maximumAge:600000});
 }
+// Keep following the user's location: nearby lists and the Qibla update when they've moved 300 m or more.
+let geoWatchId=null;
+function geoMovedTo(lat,lng){
+  if(userLat==null)return true;
+  const dLat=(lat-userLat)*111320,dLng=(lng-userLng)*111320*Math.cos(lat*Math.PI/180);
+  return Math.hypot(dLat,dLng)>=300;
+}
+function geoUpdate(pos){
+  const {latitude:lat,longitude:lng}=pos.coords;
+  if(!geoMovedTo(lat,lng))return;
+  userLat=lat;userLng=lng;
+  const nearest=sortedMosques()[0];if(nearest)getTimes(nearest).then(t=>{if(t)updateHero(t)});
+  renderHomeCards();renderMosqueList();if(!document.getElementById('followTab').hidden)renderFollowing();
+  if(!document.getElementById('qiblaTab').hidden)renderQibla();
+}
+function geoWatch(){
+  if(geoWatchId!==null||!navigator.geolocation)return;
+  try{geoWatchId=navigator.geolocation.watchPosition(geoUpdate,()=>{},{enableHighAccuracy:false,maximumAge:60000,timeout:30000})}catch(e){}
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden||geoState!=='granted')return;
+  navigator.geolocation.getCurrentPosition(geoUpdate,()=>{},{enableHighAccuracy:false,maximumAge:60000,timeout:15000});
+});
 const PIN_SVG='<svg viewBox="0 0 24 24"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-3.9-3.1-7-7-7zm0 9.5c-1.4 0-2.5-1.1-2.5-2.5S10.6 6.5 12 6.5s2.5 1.1 2.5 2.5S13.4 11.5 12 11.5z"/></svg>';
 function renderLocBanner(){
   const els=document.querySelectorAll('.loc-slot');
@@ -1952,17 +1979,17 @@ function openDetail(id){
     <div class="sect"><div class="sect-h"><span>Today</span><span>${DAYS[D.getDay()]} ${D.getDate()} ${MONS[D.getMonth()]}</span></div><div class="tl-wrap">${timeline}</div><button class="sk-here" onclick="openCheckin(${m.id})"><svg viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>I prayed here today</button></div>
     ${jumCard(m)}
     <!-- jamaat updates / "I run this mosque": coming in the next release -->
-    <div class="sect"><div class="about drop">
+    ${m.d?`    <div class="sect"><div class="about drop">
       <button class="about-btn" aria-expanded="false" onclick="const o=this.parentNode.classList.toggle('open');this.setAttribute('aria-expanded',o)">
         <span class="about-ico"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
         <span class="about-t">Donate to this mosque<span class="about-s">Sadaqah, Zakat or general funds</span></span>
         <svg class="about-chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="about-body"><div class="give-panel" id="mGive"></div></div>
-    </div></div>
+    </div></div>`:''}
     <div class="sect"><button class="def-btn${isFol?' on':''}" onclick="toggleFollow()" id="followBig"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg><span>${isFol?'Following':'Follow mosque'}</span></button></div>
     <div class="src">Information from ${m.src}. Details can change, so check with the mosque if something matters for your visit.</div>`;
-  dz={amt:10,fund:'General',target:{name:m.n,url:m.d||m.w||null,dz:m.dz||null,direct:!!m.d,mosque:true},el:'#mGive'};renderDonate();
+  if(m.d){dz={amt:10,fund:'General',target:{name:m.n,url:m.d,dz:m.dz||null,direct:true,mosque:true},el:'#mGive'};renderDonate()}
   document.getElementById('detailBody').scrollTop=0;
   document.getElementById('detailScreen').classList.add('open');
   if(cache[m.id]===undefined)getTimes(m).then(t2=>{if(t2&&document.getElementById('detailScreen').classList.contains('open')&&activeDetailId===id)openDetail(id)});
