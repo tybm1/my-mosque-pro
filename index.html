@@ -1913,7 +1913,7 @@ function jumCard(m){
   return`<div class="sect"><div class="jm-card${fri?' fri':''}"><div class="jm-h"><span class="jm-ic"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V10l7-6 7 6v11"/><path d="M10 21v-5h4v5"/></svg></span><div><div class="jm-k">Jumu’ah${fri?' · today':' · Fridays'}</div><div class="jm-t">${fmt(jumMain(m))||'See below'}</div></div>${anySeason?`<span class="jm-season">${bst?'Summer':'Winter'} time</span>`:''}</div>
     <div class="jm-rows">${rows.map(([l,t])=>`<div class="jm-r"><span>${l}</span><b>${t?fmt(t):'Check with mosque'}</b></div>`).join('')}</div>
     ${other?`<div class="jm-note">${bst?'Winter':'Summer'}: ${other}</div>`:''}${m.jm.n?`<div class="jm-note">${m.jm.n}</div>`:''}
-    <div class="jm-src">${m.jm.ok?'From':'Listed by'} ${m.jm.src}${m.jm.ok?'':' — please confirm with the mosque'}</div></div></div>`;
+</div></div>`;
 }
 function openDetail(id){
   activeDetailId=id;
@@ -1935,7 +1935,7 @@ function openDetail(id){
     timeline=(J?`<div class="tl-head"><span></span><span></span><span>Jamaat</span></div>`:'')+PR.map(p=>{const isN=p===next,isP=!isN&&toM(t[p])<nowM()&&!(next==='Fajr'&&false);
       return J?`<div class="tl j${isN?' now':isP?' past':''}"><span class="tl-dot"></span><span class="tl-n">${LBL[p]}</span><span class="tl-t">${p==='Sunrise'?fmt(t[p]):J[p]?fmt(J[p]):'—'}</span></div>`
       :`<div class="tl${isN?' now':isP?' past':''}"><span class="tl-dot"></span><span class="tl-n">${LBL[p]}</span><span class="tl-t">${fmt(t[p])}</span></div>`}).join('')
-      +`<div class="tl-cap">${J?`Jamaat times: ${esc(jamSrc(m))}. Sunrise is calculated.`:`Start times only — this mosque’s jamaat times aren’t available yet. Asr calculated by the ${asrHanafi(m)?'Hanafi':'Shafi’i'} method.`}</div>`;
+      +(J?'':`<div class="tl-cap">Start times only — this mosque’s jamaat times aren’t available yet. Asr calculated by the ${asrHanafi(m)?'Hanafi':'Shafi’i'} method.</div>`);
   }
   // sisters
   const sMap={yes:['Available','s-yes'],no:['Not available','s-no']};
@@ -1957,7 +1957,7 @@ function openDetail(id){
     m.cap&&row('cap','Capacity',`Up to ${m.cap} worshippers`),
     m.park&&row('park','Parking',m.park),
     m.wc&&row('wc','Accessibility',m.wc),
-    m.fac&&m.fac.length&&row('info','Facilities',esc(m.fac.join(' · '))+(m.facSrc?`<span class="fx-sub">From ${esc(m.facSrc)}</span>`:'')),
+    m.fac&&m.fac.length&&row('info','Facilities',esc(m.fac.join(' · '))+''),
     m.th&&row('info','Tradition',m.th),
     m.jo&&row('jum','Jumu’ah only','Used for Friday prayers; may not be open for daily prayers.'),
     ...(m.extra||[]).map(x=>row('info','Good to know',x)),
@@ -1995,7 +1995,7 @@ function openDetail(id){
       <div class="about-body"><div class="give-panel" id="mGive"></div></div>
     </div></div>`:''}
     <div class="sect"><button class="def-btn${isFol?' on':''}" onclick="toggleFollow()" id="followBig"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg><span>${isFol?'Following':'Follow mosque'}</span></button></div>
-    <div class="src">Information from ${m.src}. Details can change, so check with the mosque if something matters for your visit.</div>`;
+`;
   if(m.d){dz={amt:10,fund:'General',target:{name:m.n,url:m.d,dz:m.dz||null,direct:true,mosque:true},el:'#mGive'};renderDonate()}
   document.getElementById('detailBody').scrollTop=0;
   document.getElementById('detailScreen').classList.add('open');
