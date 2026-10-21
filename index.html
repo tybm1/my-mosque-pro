@@ -1942,11 +1942,11 @@ function openDetail(id){
         <h1 class="dh-name">${m.n}<svg class="about-chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></h1>
         <div class="dh-addr">${m.a}<span class="dh-hint">About</span></div>
       </button>
-      <button class="sis-badge ${sCls}" onclick="event.stopPropagation();this.classList.toggle('show')" aria-label="Sisters' space: ${sTxt}">
+      ${m.s==='yes'?`<button class="sis-badge ${sCls}" onclick="event.stopPropagation();this.classList.toggle('show')" aria-label="Sisters' space: ${sTxt}">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="6.5" r="3.5"/><path d="M12 10c-3 0-5 2.2-5.6 5.5L5 21h14l-1.4-5.5C17 12.2 15 10 12 10z"/></svg>
-        <span>${m.s==='yes'?"Sisters' space":m.s==='no'?"No sisters' space":"Sisters' space unconfirmed"}</span>
+        <span>Sisters' space</span>
         <em class="sis-pop">${sNote}</em>
-      </button>
+      </button>`:''}
       <div class="about-body"><div class="fx-list">${facts}</div></div>
     </div>
     ${hero}
