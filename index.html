@@ -1387,6 +1387,7 @@ async function sbGet(path){
 }
 function sbApplyProfiles(list){
   (list||[]).forEach(p=>{const m=MOSQUES.find(x=>x.id===p.id);if(!m)return;
+    if(p.app_name)m.n=p.app_name;   // name the owner set in the database (no app update needed)
     if(m._jm0===undefined)m._jm0=m.jm||null;
     const j=p.jumuah;
     if(j&&j.slots&&j.slots.length){
@@ -1416,7 +1417,7 @@ async function sbLoad(force){
     const [rows,chg,prof,hid]=await Promise.all([
       sbGet(`jamaat_upcoming?select=mosque_id,day,fajr,dhuhr,asr,maghrib,isha,jumuah,source_url&day=gte.${today}&day=lte.${end}`),
       sbGet(`submissions?select=mosque_id,prayer,time,from_date&kind=eq.change&status=eq.approved&from_date=gte.${jamAddDays(today,-13)}`).catch(()=>[]),
-      sbGet('mosques?select=id,jumuah,sisters_web,sisters_web_note,facilities,profile_src&profile_at=not.is.null').catch(()=>[]),
+      sbGet('mosques?select=id,jumuah,sisters_web,sisters_web_note,facilities,profile_src,app_name&profile_at=not.is.null').catch(()=>[]),
       sbGet('mosques?select=id&active=is.false').catch(()=>[])]);
     sbApply(rows,chg,prof,hid);SB.day=today;jamChanged();
     try{localStorage.setItem('mmp_sb',JSON.stringify({day:today,at:Date.now(),rows,chg,prof,hid}))}catch(e){}
