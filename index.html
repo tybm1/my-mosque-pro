@@ -814,10 +814,15 @@ input,select,textarea{font-size:16px!important}
 .qb-mk{position:absolute;left:50%;top:50%;transform:translate(-50%,46px);font-size:11px;font-weight:600;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;pointer-events:none}
 .qb-facing{position:absolute;top:2px;left:50%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;font-size:10px;color:var(--fg2)}
 .qb-facing span{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid var(--fg)}
-.qb-facing em{font-style:normal}
-.qb-field.aligned .qb-facing{color:var(--accent);font-weight:700;font-size:12px}
+.qb-field.live .qdeg{display:none}
 .qb-field.aligned .qb-facing span{border-top-color:var(--accent)}
-.qb-field.aligned .qb-svg{filter:drop-shadow(0 0 14px rgba(26,140,78,.35))}
+.qb-field.aligned::before{content:'';position:absolute;inset:6%;border-radius:50%;background:radial-gradient(circle,rgba(26,140,78,.12),rgba(26,140,78,0) 70%);pointer-events:none}
+.qb-field.aligned .qarc{stroke:var(--accent);opacity:1}
+.qb-field.aligned .notch{fill:var(--accent)}
+.qb-status{display:flex;align-items:center;justify-content:center;gap:8px;width:max-content;max-width:100%;margin:4px auto 0;padding:7px 14px;border-radius:100px;background:var(--gold-dim);color:var(--gold);font-size:14px;font-weight:600;transition:background .25s,color .25s}
+.qb-status.on{background:var(--accent);color:#fff}
+.qb-status svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;display:none}
+.qb-status.on svg{display:block}
 .qb-deg{margin-top:2px}
 @media (prefers-reduced-motion:reduce){.qb-svg,.qb-svg .flow,.qb-svg .tawaf,.qb-svg .you-pulse{transition:none;animation:none}}
 /* dimmer gold */
@@ -2500,8 +2505,9 @@ function renderQibla(){
   const arcSvg=`<path d="${(()=>{const r=190,a1=rad(ang-9),a2=rad(ang+9);return`M${C+r*Math.sin(a1)} ${C-r*Math.cos(a1)} A${r} ${r} 0 0 1 ${C+r*Math.sin(a2)} ${C-r*Math.cos(a2)}`})()}" class="qarc"/>
         <g transform="rotate(${ang} ${C} ${C})"><path d="M${C-8} ${C-206} L${C+8} ${C-206} L${C} ${C-194} Z" class="notch"/></g><text x="${(C+170*Math.sin(rad(ang))).toFixed(1)}" y="${(C-170*Math.cos(rad(ang))+4).toFixed(1)}" class="qdeg">${Math.round(b)}°</text>`;
   document.getElementById('qiblaBody').innerHTML=`
-    <div class="qb-field" id="qbField">
-      ${qb.live?'<div class="qb-facing" id="qbFacing" aria-live="polite"><span></span><em>Facing</em></div>':''}
+    ${qb.live&&dist>=2?'<div class="qb-status" id="qbStatus" aria-live="polite"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Turn until the arrow is at the top</span></div>':''}
+    <div class="qb-field${qb.live?' live':''}" id="qbField">
+      ${qb.live?'<div class="qb-facing" aria-hidden="true"><span></span></div>':''}
       <svg class="qb-svg" id="qbDial" viewBox="0 0 400 400" style="transform:rotate(${qb.rot!=null?-qb.rot:0}deg)" role="img" aria-label="Qibla ${Math.round(b)} degrees from north, towards the ${compassWord(b)}">
         <defs>
           <radialGradient id="qbBg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#f1e5c6"/><stop offset="55%" stop-color="#f8f2e4"/><stop offset="100%" stop-color="#fafafa" stop-opacity="0"/></radialGradient>
@@ -2548,7 +2554,7 @@ function qbCheckAligned(){
   if(on===qb.aligned)return;
   qb.aligned=on;
   const f=document.getElementById('qbField');if(f)f.classList.toggle('aligned',on);
-  const t=document.querySelector('#qbFacing em');if(t)t.textContent=on?'Facing the Qibla':'Facing';
+  const st=document.getElementById('qbStatus');if(st){st.classList.toggle('on',on);st.querySelector('span').textContent=on?'You’re facing the Qibla':'Turn until the arrow is at the top'}
   if(on)qbBuzz();
 }
 function onHeading(e){
@@ -2559,10 +2565,10 @@ function onHeading(e){
   h=(h+qbScreenAngle())%360;
   if(qb.rot==null){qb.rot=h}
   let delta=((h-qb.rot)%360+540)%360-180;      // shortest way round, so crossing north never spins the dial
+  if(!qb.live){qb.live=true;qb.heading=((qb.rot%360)+360)%360;renderQibla();const d=document.getElementById('qbDial');if(d)d.style.transform=`rotate(${-qb.rot}deg)`}
   qbStatus(e);
-  if(Math.abs(delta)<0.6)return;                // ignore sensor jitter
+  if(Math.abs(delta)<0.6){qbCheckAligned();return}   // ignore sensor jitter
   qb.rot+=delta*0.35;qb.heading=((qb.rot%360)+360)%360;
-  if(!qb.live){qb.live=true;renderQibla()}
   qbCheckAligned();
   if(qb.raf)return;
   qb.raf=requestAnimationFrame(()=>{qb.raf=0;const d=document.getElementById('qbDial');if(d)d.style.transform=`rotate(${-qb.rot}deg)`});
