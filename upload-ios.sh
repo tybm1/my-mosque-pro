@@ -4,6 +4,15 @@
 cd "$HOME/Documents/MyMosquePro-app/ios/App" 2>/dev/null || { echo "Can't find Documents/MyMosquePro-app/ios/App"; exit 1; }
 fail(){ echo ""; echo "STOPPED: $1"; echo "Please send a screenshot of this window to Claude."; exit 1; }
 
+# Use the full Xcode app (the Mac may be set to the smaller "Command Line Tools", which can't build iPhone apps)
+if ! xcodebuild -version >/dev/null 2>&1; then
+  XC=$(ls -d /Applications/Xcode*.app 2>/dev/null | head -1)
+  [ -n "$XC" ] || fail "Xcode isn't in the Applications folder."
+  export DEVELOPER_DIR="$XC/Contents/Developer"
+  echo "Using $XC"
+fi
+xcodebuild -version >/dev/null 2>&1 || fail "Xcode needs to finish setting up. Open Xcode once, accept any prompts, then run this again."
+
 if [ -d App.xcworkspace ]; then SRC=(-workspace App.xcworkspace); else SRC=(-project App.xcodeproj); fi
 OUT="$HOME/Documents/MyMosquePro-app/build-ios"
 rm -rf "$OUT"; mkdir -p "$OUT"
